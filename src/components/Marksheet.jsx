@@ -7,7 +7,6 @@ function Marksheet({ students }) {
   const sapId = searchParams.get("sapId");
   const semester = searchParams.get("semester");
 
-  // Find selected student
   const student = students.find(
     (student) => student.sapId === sapId
   );
@@ -18,7 +17,6 @@ function Marksheet({ students }) {
 
   const semesterMarks = student.marks[semester];
 
-  // Converts marks into grade
   function calculateGrade(marks) {
     if (marks >= 90) {
       return "O";
@@ -37,7 +35,6 @@ function Marksheet({ students }) {
     }
   }
 
-  // Converts marks into grade points
   function calculateGradePoint(marks) {
     if (marks >= 90) {
       return 10;
@@ -62,7 +59,6 @@ function Marksheet({ students }) {
     const gradePoint3 = calculateGradePoint(marks.subject3);
     const gradePoint4 = calculateGradePoint(marks.subject4);
 
-    // Assuming all 4 subjects have same credit
     const sgpa = (gradePoint1 + gradePoint2 + gradePoint3 + gradePoint4) / 4;
     return sgpa.toFixed(2);
   }
@@ -74,11 +70,11 @@ function Marksheet({ students }) {
     });
   }
 
-  const formatSemesterLabel = (semKey) => {
+{  const formatSemesterLabel = (semKey) => {
     if (!semKey) return "";
     const digit = semKey.match(/\d+/);
     return digit ? `Semester ${digit[0]}` : semKey;
-  };
+  };}
 
   return (
     <div>
