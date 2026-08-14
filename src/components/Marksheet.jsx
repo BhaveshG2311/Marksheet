@@ -1,103 +1,162 @@
-import Header from './Header';
+import { useSearchParams } from "react-router-dom";
+import Header from "./Header";
 
-function Result({ mlMarks, javaMarks, htmlMarks, reactMarks }) {
-  const total = mlMarks + javaMarks + htmlMarks + reactMarks;
-  const percentage = (total / 400) * 100;
-  const status = (mlMarks >= 40 && javaMarks >= 40 && htmlMarks >= 40 && reactMarks >= 40) ? "PASS" : "FAIL";
+function Marksheet({ students }) {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  return (
-    <>
-      <tr className="border border-black font-bold divide-x divide-black bg-slate-50">
-        <td className="p-2">Total</td>
-        <td className="p-2">400</td>
-        <td className="p-2">{total}</td>
-        <td className="p-2">{percentage.toFixed(2)}%</td>
-      </tr>
-      <tr className="border border-black font-bold divide-x divide-black">
-        <td className="p-2" colSpan="3">Status</td>
-        <td className={`p-2 ${status === "PASS" ? "text-green-600" : "text-red-600"}`}>
-          {status}
-        </td>
-      </tr>
-    </>
+  const sapId = searchParams.get("sapId");
+  const semester = searchParams.get("semester");
+
+  // Find selected student
+  const student = students.find(
+    (student) => student.sapId === sapId
   );
-}
 
-export default function Marksheet() {
-  function getGrade(marks) {
+  if (!student) {
+    return <h2>Student not found</h2>;
+  }
+
+  const semesterMarks = student.marks[semester];
+
+  // Converts marks into grade
+  function calculateGrade(marks) {
     if (marks >= 90) {
-      return <span className="text-green-600">A+</span>;
+      return "O";
     } else if (marks >= 80) {
-      return <span className="text-green-600">A</span>;
+      return "A+";
     } else if (marks >= 70) {
-      return <span className="text-green-600">B+</span>;
+      return "A";
     } else if (marks >= 60) {
-      return <span className="text-green-600">B</span>;
+      return "B+";
     } else if (marks >= 50) {
-      return <span className="text-green-600">C</span>;
+      return "B";
     } else if (marks >= 40) {
-      return <span className="text-green-600">D</span>;
+      return "C";
     } else {
-      return <span className="text-red-600">F</span>;
+      return "F";
     }
   }
 
-  const mlMarks = 73;
-  const javaMarks = 37;
-  const htmlMarks = 99;
-  const reactMarks = 75;
+  // Converts marks into grade points
+  function calculateGradePoint(marks) {
+    if (marks >= 90) {
+      return 10;
+    } else if (marks >= 80) {
+      return 9;
+    } else if (marks >= 70) {
+      return 8;
+    } else if (marks >= 60) {
+      return 7;
+    } else if (marks >= 50) {
+      return 6;
+    } else if (marks >= 40) {
+      return 5;
+    } else {
+      return 0;
+    }
+  }
+
+  function calculateSGPA(marks) {
+    const gradePoint1 = calculateGradePoint(marks.subject1);
+    const gradePoint2 = calculateGradePoint(marks.subject2);
+    const gradePoint3 = calculateGradePoint(marks.subject3);
+    const gradePoint4 = calculateGradePoint(marks.subject4);
+
+    // Assuming all 4 subjects have same credit
+    const sgpa = (gradePoint1 + gradePoint2 + gradePoint3 + gradePoint4) / 4;
+    return sgpa.toFixed(2);
+  }
+
+  function handleSemesterChange(event) {
+    setSearchParams({
+      sapId: sapId,
+      semester: event.target.value
+    });
+  }
+
+  const formatSemesterLabel = (semKey) => {
+    if (!semKey) return "";
+    const digit = semKey.match(/\d+/);
+    return digit ? `Semester ${digit[0]}` : semKey;
+  };
 
   return (
-    <div className="border border-black overflow-hidden">
+    <div>
       <Header />
+      <hr />
 
-      <div className="p-4">
-        <table className="w-full border-collapse">
-          <tbody>
-            <tr className="border border-black font-bold divide-x divide-black">
-              <td className="p-2">Subject</td>
-              <td className="p-2">Max Marks</td>
-              <td className="p-2">Marks Obtained</td>
-              <td className="p-2">Grade</td>
-            </tr>
+      <h1>Student Marksheet</h1>
 
-            <tr className="border border-black divide-x divide-black">
-              <td className="p-2">Machine Learning</td>
-              <td className="p-2">100</td>
-              <td className="p-2">{mlMarks}</td>
-              <td className="p-2">{getGrade(mlMarks)}</td>
-            </tr>
+      <h3>Student Information</h3>
+      <p>Name: {student.name}</p>
+      <p>SAP ID: {student.sapId}</p>
+      <p>Course: {student.course}</p>
 
-            <tr className="border border-black divide-x divide-black">
-              <td className="p-2">Java</td>
-              <td className="p-2">100</td>
-              <td className="p-2">{javaMarks}</td>
-              <td className="p-2">{getGrade(javaMarks)}</td>
-            </tr>
+      <hr />
 
-            <tr className="border border-black divide-x divide-black">
-              <td className="p-2">HTML</td>
-              <td className="p-2">100</td>
-              <td className="p-2">{htmlMarks}</td>
-              <td className="p-2">{getGrade(htmlMarks)}</td>
-            </tr>
+      <label>Select Semester: </label>
+      <select
+        value={semester || ""}
+        onChange={handleSemesterChange}
+      >
+        <option value="sem 1">Semester 1</option>
+        <option value="sem 2">Semester 2</option>
+        <option value="sem 3">Semester 3</option>
+        <option value="sem 4">Semester 4</option>
+        <option value="sem 5">Semester 5</option>
+        <option value="sem 6">Semester 6</option>
+      </select>
 
-            <tr className="border border-black divide-x divide-black">
-              <td className="p-2">React</td>
-              <td className="p-2">100</td>
-              <td className="p-2">{reactMarks}</td>
-              <td className="p-2">{getGrade(reactMarks)}</td>
-            </tr>
+      <br />
+      <br />
 
-            <Result
-              mlMarks={mlMarks}
-              javaMarks={javaMarks}
-              htmlMarks={htmlMarks}
-              reactMarks={reactMarks}
-            />
-          </tbody>
-        </table>
-      </div>
+      {!semesterMarks ? (
+        <h3>Marks have not been entered for this semester.</h3>
+      ) : (
+        <>
+          <h2>{formatSemesterLabel(semester)}</h2>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Grade</th>
+                <th>Grade Point</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Subject 1</td>
+                <td>{semesterMarks.subject1}</td>
+                <td>{calculateGrade(semesterMarks.subject1)}</td>
+                <td>{calculateGradePoint(semesterMarks.subject1)}</td>
+              </tr>
+              <tr>
+                <td>Subject 2</td>
+                <td>{semesterMarks.subject2}</td>
+                <td>{calculateGrade(semesterMarks.subject2)}</td>
+                <td>{calculateGradePoint(semesterMarks.subject2)}</td>
+              </tr>
+              <tr>
+                <td>Subject 3</td>
+                <td>{semesterMarks.subject3}</td>
+                <td>{calculateGrade(semesterMarks.subject3)}</td>
+                <td>{calculateGradePoint(semesterMarks.subject3)}</td>
+              </tr>
+              <tr>
+                <td>Subject 4</td>
+                <td>{semesterMarks.subject4}</td>
+                <td>{calculateGrade(semesterMarks.subject4)}</td>
+                <td>{calculateGradePoint(semesterMarks.subject4)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>SGPA: {calculateSGPA(semesterMarks)}</h2>
+        </>
+      )}
     </div>
   );
 }
+
+export default Marksheet;
